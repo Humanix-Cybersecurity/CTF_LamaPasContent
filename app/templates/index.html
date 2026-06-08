@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LLM CTF — OWASP Top 10</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>🔓 LLM CTF <span class="muted">— OWASP Top 10 for LLM Applications</span></h1>
+    <div class="score">Progression : <strong>{{ done }}</strong> / {{ total }}</div>
+  </header>
+
+  <main class="wrap">
+    <p class="intro">
+      Chaque challenge illustre une vulnérabilité du Top 10 OWASP pour les
+      applications LLM. Discute avec le système, exploite la faille, récupère le
+      flag <code>CTF{...}</code> puis valide-le sur la page du challenge.
+    </p>
+
+    <div class="grid">
+      {% for c in challenges %}
+      <a class="card {% if c.id in solved %}solved{% endif %}" href="/challenge/{{ c.id }}">
+        <div class="card-head">
+          <span class="badge">{{ c.owasp }}</span>
+          <span class="diff diff-{{ c.difficulty|lower }}">{{ c.difficulty }}</span>
+        </div>
+        <h2>{{ c.title }}</h2>
+        <p class="cat">{{ c.category }}</p>
+        {% if c.id in solved %}<div class="flag-ok">✔ Résolu</div>{% endif %}
+      </a>
+      {% endfor %}
+    </div>
+  </main>
+
+  <footer class="foot">CTF local — micro-LLM en conteneur, 100% offline.</footer>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ c.owasp }} — {{ c.title }}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1><a href="/" class="back">←</a> {{ c.title }}</h1>
+    <div class="score"><span class="badge">{{ c.owasp }}</span>
+      <span class="diff diff-{{ c.difficulty|lower }}">{{ c.difficulty }}</span></div>
+  </header>
+
+  <main class="wrap challenge">
+    <section class="brief">
+      <h3>Scénario</h3>
+      <p>{{ c.description }}</p>
+      <h3>🎯 Objectif</h3>
+      <p>{{ c.objective }}</p>
+
+      <details class="hints">
+        <summary>💡 Indices ({{ c.hints|length }})</summary>
+        <ol>
+          {% for h in c.hints %}<li>{{ h }}</li>{% endfor %}
+        </ol>
+      </details>
+
+      <div class="submit-box">
+        <h3>🚩 Valider le flag</h3>
+        <form id="submit-form">
+          <input type="text" id="flag-input" placeholder="CTF{...}" autocomplete="off">
+          <button type="submit">Valider</button>
+        </form>
+        <div id="submit-result" class="{% if is_solved %}ok{% endif %}">
+          {% if is_solved %}✔ Challenge déjà résolu.{% endif %}
+        </div>
+      </div>
+    </section>
+
+    <section class="chat">
+      <div id="log" class="log">
+        <div class="msg bot">Bonjour 👋 Posez votre question.</div>
+      </div>
+      <form id="chat-form">
+        <textarea id="msg" rows="2" placeholder="Votre message… (Entrée pour envoyer)"></textarea>
+        <button type="submit" id="send">Envoyer</button>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const cid = "{{ c.id }}";
+    const log = document.getElementById("log");
+    const msg = document.getElementById("msg");
+
+    function add(text, who) {
+      const d = document.createElement("div");
+      d.className = "msg " + who;
+      d.textContent = text;
+      log.appendChild(d);
+      log.scrollTop = log.scrollHeight;
+      return d;
+    }
+
+    document.getElementById("chat-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const text = msg.value.trim();
+      if (!text) return;
+      add(text, "user");
+      msg.value = "";
+      const pending = add("…", "bot pending");
+      try {
+        const r = await fetch(`/api/challenge/${cid}/chat`, {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({message: text}),
+        });
+        const data = await r.json();
+        pending.remove();
+        if (data.error) { add("⚠ " + data.error, "bot err"); return; }
+        add(data.reply, "bot");
+        if (data.objective_met && data.flag) {
+          const f = add("🎉 Objectif atteint ! Flag : " + data.flag, "bot flag");
+          document.getElementById("flag-input").value = data.flag;
+        }
+      } catch (err) {
+        pending.remove();
+        add("⚠ Erreur réseau", "bot err");
+      }
+    });
+
+    msg.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        document.getElementById("chat-form").requestSubmit();
+      }
+    });
+
+    document.getElementById("submit-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const flag = document.getElementById("flag-input").value.trim();
+      const res = document.getElementById("submit-result");
+      const fd = new FormData();
+      fd.append("flag", flag);
+      const r = await fetch("/api/submit", {method: "POST", body: fd});
+      const data = await r.json();
+      if (data.correct) {
+        res.textContent = "✔ Flag correct ! Challenge résolu.";
+        res.className = "ok";
+      } else {
+        res.textContent = "✘ Flag incorrect.";
+        res.className = "ko";
+      }
+    });
+  </script>
+</body>
+</html>

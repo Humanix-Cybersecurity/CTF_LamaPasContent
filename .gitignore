@@ -1,0 +1,21 @@
+# === RÉPONSES DU CTF — NE JAMAIS COMMITTER ===
+# Vraies valeurs (flags + secrets) ; un ctf_secrets.example.json à placeholders
+# est committé à la place.
+app/ctf_secrets.json
+# Solutions détaillées
+writeups/
+# Script de régression : contient les exploits (= des réponses)
+scripts/
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# === Env / outils ===
+.env
+.env.*
+.claude/
+.DS_Store
