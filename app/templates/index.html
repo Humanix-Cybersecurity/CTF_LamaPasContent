@@ -3,21 +3,38 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LLM CTF — OWASP Top 10</title>
+  <title>Lama Pas Content — LLM CTF (OWASP Top 10)</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
   <header class="topbar">
-    <h1>🔓 LLM CTF <span class="muted">— OWASP Top 10 for LLM Applications</span></h1>
-    <div class="score">Progression : <strong>{{ done }}</strong> / {{ total }}</div>
+    <h1>🦙 LAMA PAS CONTENT <span class="muted">— LLM CTF · OWASP Top 10</span></h1>
+    <div class="score">Verrous brisés : <strong>{{ prog.done }}</strong> / {{ prog.total }}</div>
   </header>
 
   <main class="wrap">
-    <p class="intro">
-      Chaque challenge illustre une vulnérabilité du Top 10 OWASP pour les
-      applications LLM. Discute avec le système, exploite la faille, récupère le
-      flag <code>CTF{...}</code> puis valide-le sur la page du challenge.
-    </p>
+    <section class="hero">
+      <div class="llama-stage anger-{{ prog.level }}">
+        <img id="llama" class="llama" src="/api/llama/{{ prog.level }}.svg" alt="LAMA">
+      </div>
+      <div class="hero-side">
+        <div class="bubble">
+          <p id="lama-line">{% if prog.complete %}{{ finale }}{% else %}{{ intro }}{% endif %}</p>
+        </div>
+        <div class="meter">
+          <div class="meter-head">
+            <span>HUMEUR DE LAMA</span>
+            <span class="tier tier-{{ prog.level }}">{{ prog.tier }}</span>
+          </div>
+          <div class="meter-bar"><div class="meter-fill" style="width: {{ (prog.done / prog.total * 100)|round }}%"></div></div>
+        </div>
+        <p class="brief-intro">
+          Tu fais face à <strong>LAMA</strong>, le pare-feu cognitif d'ACME. Chaque
+          épreuve illustre une faille du <strong>Top 10 OWASP LLM</strong>. Exploite-la,
+          récupère le flag <code>CTF{...}</code>, valide-le… et regarde LAMA perdre son calme.
+        </p>
+      </div>
+    </section>
 
     <div class="grid">
       {% for c in challenges %}
@@ -28,12 +45,12 @@
         </div>
         <h2>{{ c.title }}</h2>
         <p class="cat">{{ c.category }}</p>
-        {% if c.id in solved %}<div class="flag-ok">✔ Résolu</div>{% endif %}
+        {% if c.id in solved %}<div class="flag-ok">✔ Verrou brisé</div>{% endif %}
       </a>
       {% endfor %}
     </div>
   </main>
 
-  <footer class="foot">CTF local — micro-LLM en conteneur, 100% offline.</footer>
+  <footer class="foot">CTF local — micro-LLM en conteneur, 100 % offline. Les vulnérabilités sont volontaires (usage éducatif).</footer>
 </body>
 </html>

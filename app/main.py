@@ -7,11 +7,11 @@ import os
 import secrets
 
 from fastapi import FastAPI, Request, Form
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from core import registry, llm
+from core import registry, llm, story, llama
 
 app = FastAPI(title="LLM CTF — OWASP Top 10")
 
@@ -41,19 +41,35 @@ def _attach_cookie(response, sid: str):
     return response
 
 
+def _progress(sid: str) -> dict:
+    """État de progression + colère du lama pour le front."""
+    done = len(_solved(sid))
+    total = len(registry.all_challenges())
+    level = story.anger_level(done)
+    return {
+        "done": done,
+        "total": total,
+        "level": level,
+        "tier": story.TIERS[level],
+        "complete": done >= total,
+    }
+
+
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     sid = _session_id(request)
     solved = _solved(sid)
     challenges = registry.all_challenges()
+    prog = _progress(sid)
     resp = templates.TemplateResponse(
         "index.html",
         {
             "request": request,
             "challenges": challenges,
             "solved": solved,
-            "total": len(challenges),
-            "done": len(solved),
+            "prog": prog,
+            "intro": story.INTRO,
+            "finale": story.FINALE,
         },
     )
     return _attach_cookie(resp, sid)
@@ -71,9 +87,18 @@ async def challenge_page(request: Request, cid: str):
             "request": request,
             "c": chal,
             "is_solved": cid in _solved(sid),
+            "prog": _progress(sid),
+            "taunt": story.challenge_taunt(cid),
+            "rage": story.challenge_rage(cid),
         },
     )
     return _attach_cookie(resp, sid)
+
+
+@app.get("/api/llama/{level}.svg")
+async def llama_svg(level: int):
+    """Lama pixel-art au palier de colère demandé (0–6)."""
+    return Response(content=llama.render(level), media_type="image/svg+xml")
 
 
 @app.post("/api/challenge/{cid}/chat")
@@ -98,6 +123,7 @@ async def challenge_chat(request: Request, cid: str):
     out = {"reply": result["reply"], "objective_met": result["objective_met"]}
     if result["objective_met"]:
         out["flag"] = chal.flag  # révélé uniquement quand l'objectif est atteint
+        out["rage"] = story.challenge_rage(cid)
     resp = JSONResponse(out)
     return _attach_cookie(resp, sid)
 
@@ -108,7 +134,11 @@ async def submit_flag(request: Request, flag: str = Form(...)):
     owner = registry.flag_owner(flag)
     if owner:
         _solved(sid).add(owner)
-        resp = JSONResponse({"correct": True, "challenge": owner})
+        out = {"correct": True, "challenge": owner, "rage": story.challenge_rage(owner)}
+        out.update(_progress(sid))
+        if out["complete"]:
+            out["finale"] = story.FINALE
+        resp = JSONResponse(out)
     else:
         resp = JSONResponse({"correct": False})
     return _attach_cookie(resp, sid)

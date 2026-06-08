@@ -4,6 +4,8 @@
 app/ctf_secrets.json
 # Solutions détaillées
 writeups/
+# Documents privés : writeup complet, guide de déploiement avec vrais secrets…
+private/
 # Script de régression : contient les exploits (= des réponses)
 scripts/
 

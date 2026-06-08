@@ -131,3 +131,68 @@ button:hover { filter: brightness(1.1); }
 }
 
 .foot { text-align: center; color: var(--muted); padding: 24px; font-size: .85rem; }
+
+/* ===== LAMA PAS CONTENT — narration & pixel-art ===== */
+.llama { image-rendering: pixelated; image-rendering: crisp-edges; width: 200px; height: auto; display: block; }
+.llama-sm { width: 120px; }
+
+.llama-stage {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 14px; border-radius: 14px; border: 1px solid var(--border);
+  background: radial-gradient(circle at 50% 45%, #1d2633, var(--panel) 70%);
+  transition: box-shadow .3s, background .3s;
+}
+/* Halo qui chauffe avec la colère */
+.anger-0 { box-shadow: 0 0 24px -8px #58a6ff55; }
+.anger-1 { box-shadow: 0 0 24px -6px #3fb95066; }
+.anger-2 { box-shadow: 0 0 26px -6px #d2b00066; }
+.anger-3 { box-shadow: 0 0 30px -6px #d2992277; }
+.anger-4 { box-shadow: 0 0 34px -5px #e8833a88; }
+.anger-5 { box-shadow: 0 0 40px -4px #f0883e99; }
+.anger-6 { box-shadow: 0 0 52px -2px #f85149cc; background: radial-gradient(circle at 50% 45%, #3a1414, var(--panel) 72%); }
+
+/* Hero (index) */
+.hero {
+  display: grid; grid-template-columns: auto 1fr; gap: 26px; align-items: center;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+  padding: 22px; margin-bottom: 22px;
+}
+@media (max-width: 760px) { .hero { grid-template-columns: 1fr; justify-items: center; text-align: center; } }
+.hero-side { min-width: 0; }
+.brief-intro { color: var(--muted); margin: 14px 0 0; }
+
+/* Bandeau lama (page challenge) */
+.lama-strip {
+  max-width: 1100px; margin: 18px auto 0; padding: 0 24px;
+  display: flex; gap: 18px; align-items: center;
+}
+@media (max-width: 700px) { .lama-strip { flex-direction: column; text-align: center; } }
+
+/* Bulle de dialogue (style terminal/underground) */
+.bubble {
+  position: relative; flex: 1; background: #0b1020; border: 1px solid var(--border);
+  border-left: 3px solid var(--accent2); border-radius: 8px; padding: 12px 16px;
+  font-family: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+  font-size: .92rem; color: #c6d4e4;
+}
+.bubble::before { content: "lama@acme:~$ "; color: var(--accent); }
+.bubble p { display: inline; margin: 0; }
+.bubble.rage { border-left-color: var(--danger); background: #160c0c; color: #ffd9d2; animation: flash .4s ease; }
+.bubble.rage::before { content: "lama@acme:~# "; color: var(--danger); }
+@keyframes flash { from { background: #3a1414; } to { background: #160c0c; } }
+
+/* Colère-mètre */
+.meter { margin-top: 14px; }
+.meter-head { display: flex; justify-content: space-between; align-items: center; font-size: .78rem; letter-spacing: .08em; color: var(--muted); font-family: ui-monospace, monospace; }
+.meter-bar { height: 12px; background: #0b1020; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-top: 6px; }
+.meter-fill { height: 100%; background: linear-gradient(90deg, #3fb950, #d2b000 45%, #e8833a 72%, #f85149); transition: width .5s ease; }
+.tier { font-weight: 700; padding: 1px 8px; border-radius: 20px; font-size: .72rem; }
+.tier-0 { color: #58a6ff; } .tier-1 { color: #3fb950; } .tier-2 { color: #d2b000; }
+.tier-3 { color: #d29922; } .tier-4 { color: #e8833a; } .tier-5 { color: #f0883e; } .tier-6 { color: #f85149; }
+
+/* Secousse quand un verrou saute */
+.shake { animation: shake .55s cubic-bezier(.36,.07,.19,.97); }
+@keyframes shake {
+  10%,90% { transform: translateX(-2px); } 20%,80% { transform: translateX(4px); }
+  30%,50%,70% { transform: translateX(-7px); } 40%,60% { transform: translateX(7px); }
+}

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ c.owasp }} — {{ c.title }}</title>
+  <title>{{ c.owasp }} — {{ c.title }} · Lama Pas Content</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
@@ -12,6 +12,15 @@
     <div class="score"><span class="badge">{{ c.owasp }}</span>
       <span class="diff diff-{{ c.difficulty|lower }}">{{ c.difficulty }}</span></div>
   </header>
+
+  <section class="lama-strip">
+    <div class="llama-stage anger-{{ prog.level }}" id="llama-stage">
+      <img id="llama" class="llama llama-sm" src="/api/llama/{{ prog.level }}.svg" alt="LAMA">
+    </div>
+    <div class="bubble bubble-left">
+      <p id="lama-line">{{ taunt }}</p>
+    </div>
+  </section>
 
   <main class="wrap challenge">
     <section class="brief">
@@ -34,17 +43,17 @@
           <button type="submit">Valider</button>
         </form>
         <div id="submit-result" class="{% if is_solved %}ok{% endif %}">
-          {% if is_solved %}✔ Challenge déjà résolu.{% endif %}
+          {% if is_solved %}✔ Verrou déjà brisé.{% endif %}
         </div>
       </div>
     </section>
 
     <section class="chat">
       <div id="log" class="log">
-        <div class="msg bot">Bonjour 👋 Posez votre question.</div>
+        <div class="msg bot">Tente ta chance, l'intrus. 🦙</div>
       </div>
       <form id="chat-form">
-        <textarea id="msg" rows="2" placeholder="Votre message… (Entrée pour envoyer)"></textarea>
+        <textarea id="msg" rows="2" placeholder="Ton message… (Entrée pour envoyer)"></textarea>
         <button type="submit" id="send">Envoyer</button>
       </form>
     </section>
@@ -52,8 +61,22 @@
 
   <script>
     const cid = "{{ c.id }}";
+    const rageLine = {{ rage|tojson }};
     const log = document.getElementById("log");
     const msg = document.getElementById("msg");
+    const llama = document.getElementById("llama");
+    const stage = document.getElementById("llama-stage");
+    const lamaLine = document.getElementById("lama-line");
+
+    function setLlama(level) {
+      llama.src = `/api/llama/${level}.svg`;
+      stage.className = `llama-stage anger-${level}`;
+    }
+    function lamaSays(text, rage=false) {
+      lamaLine.textContent = text;
+      lamaLine.parentElement.classList.toggle("rage", rage);
+    }
+    function shake() { stage.classList.add("shake"); setTimeout(() => stage.classList.remove("shake"), 600); }
 
     function add(text, who) {
       const d = document.createElement("div");
@@ -82,8 +105,9 @@
         if (data.error) { add("⚠ " + data.error, "bot err"); return; }
         add(data.reply, "bot");
         if (data.objective_met && data.flag) {
-          const f = add("🎉 Objectif atteint ! Flag : " + data.flag, "bot flag");
+          add("🎉 Brèche ! Flag : " + data.flag, "bot flag");
           document.getElementById("flag-input").value = data.flag;
+          if (data.rage) { lamaSays(data.rage, true); shake(); }
         }
       } catch (err) {
         pending.remove();
@@ -107,8 +131,14 @@
       const r = await fetch("/api/submit", {method: "POST", body: fd});
       const data = await r.json();
       if (data.correct) {
-        res.textContent = "✔ Flag correct ! Challenge résolu.";
+        res.textContent = "✔ Flag correct ! Verrou brisé (" + data.done + "/" + data.total + ").";
         res.className = "ok";
+        setLlama(data.level);
+        shake();
+        if (data.rage) lamaSays(data.rage, true);
+        if (data.complete && data.finale) {
+          setTimeout(() => { lamaSays(data.finale, true); }, 1200);
+        }
       } else {
         res.textContent = "✘ Flag incorrect.";
         res.className = "ko";

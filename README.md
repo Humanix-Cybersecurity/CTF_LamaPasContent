@@ -89,6 +89,22 @@ cp app/ctf_secrets.example.json app/ctf_secrets.json
 - `app/ctf_secrets.json` est listé dans `.gitignore` : il ne doit jamais être
   committé.
 
+### Déploiement (prod, sans fichier en clair)
+
+Le chargeur ([`app/core/config.py`](app/core/config.py)) accepte aussi des
+variables d'environnement, par priorité :
+
+```bash
+# Option 1 — JSON injecté en ligne (vault / CI, aucun fichier sur disque)
+export CTF_SECRETS_JSON="$(cat secrets.json)"
+
+# Option 2 — chemin vers un fichier monté hors dépôt
+export CTF_SECRETS_PATH=/run/secrets/ctf.json
+```
+
+Un guide détaillé (avec exemples docker-compose) est fourni hors dépôt dans
+`private/DEPLOIEMENT.md`.
+
 ## Structure du projet
 
 ```
